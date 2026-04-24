@@ -9,7 +9,7 @@ namespace ConsoleSystemMonitoring.MetricCollectors
 
         private readonly IPv4InterfaceStatistics[] _previousData;
 
-        public WindowsNetworkMetricCollector()
+        public WindowsNetworkMetricCollector(Configuration config) : base(config)
         {
             _interfaces = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(iface => iface.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
@@ -19,10 +19,13 @@ namespace ConsoleSystemMonitoring.MetricCollectors
 
         public override string GetStringData()
         {
+            var resultString = new StringBuilder();
             var data = GetTotalInOutSpeed();
 
+            AppendCurrentDateTimeToLogFileData(resultString);
+            resultString.AppendLine($"Total speed: In = {data.Item1} B/s, Out = {data.Item2} B/s");
 
-            return $"Total speed: In = {data.Item1} B/s, Out = {data.Item2} B/s";
+            return resultString.ToString();
         }
 
         private (long, long) GetTotalInOutSpeed()

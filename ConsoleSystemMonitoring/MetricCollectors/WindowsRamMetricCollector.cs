@@ -3,7 +3,7 @@ using Hardware.Info;
 
 namespace ConsoleSystemMonitoring.MetricCollectors
 {
-    internal class WindowsRamMetricCollector : BaseMetricCollector
+    internal class WindowsRamMetricCollector(Configuration config) : BaseMetricCollector(config)
     {
         private readonly HardwareInfo _info = new();
 
@@ -12,8 +12,12 @@ namespace ConsoleSystemMonitoring.MetricCollectors
             _info.RefreshMemoryStatus();
             var resultString = new StringBuilder();
 
+            // TODO: Подумать о методе расширении для добавления текущей даты и времени в строку, чтобы не дублировать код
+            AppendCurrentDateTimeToLogFileData(resultString);
             resultString.AppendLine($"Total RAM: {GetTotalRamValue() / 1024 / 1024} MB");
+            AppendCurrentDateTimeToLogFileData(resultString);
             resultString.AppendLine($"Available RAM: {GetAvailableRamValue() / 1024 / 1024} MB");
+            AppendCurrentDateTimeToLogFileData(resultString);
             resultString.AppendLine($"RAM Usage: {GetRamUsagePercent():F2}%");
 
             return resultString.ToString();

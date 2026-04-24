@@ -1,0 +1,5 @@
+{
+  "CollectionInterval": 3,
+  "OutputFormat": "LogFile",
+  "LogFileName": "../../../log.txt"
+}

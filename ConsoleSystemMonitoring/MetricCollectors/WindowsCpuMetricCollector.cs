@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using System.Text;
 
@@ -10,7 +11,7 @@ namespace ConsoleSystemMonitoring.MetricCollectors
         private readonly PerformanceCounter _totalCounter;
         private readonly PerformanceCounter[] _coreCounters;
 
-        public WindowsCpuMetricCollector() : base()
+        public WindowsCpuMetricCollector(Configuration config) : base(config)
         {
             _totalCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
@@ -31,11 +32,13 @@ namespace ConsoleSystemMonitoring.MetricCollectors
         {
             var resultString = new StringBuilder();
 
+            AppendCurrentDateTimeToLogFileData(resultString);
             resultString.AppendLine($"Total CPU Usage: {GetTotalCpuUsage():F2}%");
 
             var usagePerCore = GetCpuUsagePerCore();
             for (int i = 0; i < usagePerCore.Length; i++)
             {
+                AppendCurrentDateTimeToLogFileData(resultString);
                 resultString.AppendLine($"Core {i} Usage: {usagePerCore[i]:F2}%");
             }
             return resultString.ToString();
