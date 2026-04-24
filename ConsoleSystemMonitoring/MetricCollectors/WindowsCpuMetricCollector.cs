@@ -20,13 +20,13 @@ namespace ConsoleSystemMonitoring.MetricCollectors
                 _coreCounters[i] = new PerformanceCounter("Processor", "% Processor Time", i.ToString());
             }
 
-            _totalCounter.NextValue();
-            foreach (var coreCounter in _coreCounters)
-            {
-                coreCounter.NextValue();
-            }
+            //_totalCounter.NextValue();
+            //foreach (var coreCounter in _coreCounters)
+            //{
+            //    coreCounter.NextValue();
+            //}
         }
-        
+
         public override string GetStringData()
         {
             var resultString = new StringBuilder();
@@ -42,7 +42,7 @@ namespace ConsoleSystemMonitoring.MetricCollectors
         }
 
         private double GetTotalCpuUsage() => _totalCounter.NextValue();
-        
+
         private double[] GetCpuUsagePerCore()
         {
             double[] usagePerCore = new double[_coreCounters.Length];

@@ -12,15 +12,17 @@ namespace ConsoleSystemMonitoring
                 return;
             }
 
-            //var cpuCollector = new MetricCollectors.WindowsCpuMetricCollector();
-            //var ramCollector = new MetricCollectors.WindowsRamMetricCollector();
-            //while (true)
-            //{
-            //    Console.WriteLine(cpuCollector.GetStringData());
-            //    Console.WriteLine(ramCollector.GetStringData());
-            //    Thread.Sleep(1000);
-            //    Console.Clear();
-            //}
+            var cpuCollector = new MetricCollectors.WindowsCpuMetricCollector();
+            var ramCollector = new MetricCollectors.WindowsRamMetricCollector();
+            var netCollector = new MetricCollectors.WindowsNetworkMetricCollector();
+            while (true)
+            {
+                Console.WriteLine(cpuCollector.GetStringData());
+                Console.WriteLine(ramCollector.GetStringData());
+                Console.WriteLine(netCollector.GetStringData());
+                Thread.Sleep(1000);
+                Console.Clear();
+            }
         }
     }
 }

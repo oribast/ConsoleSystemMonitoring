@@ -3,13 +3,13 @@ using Hardware.Info;
 
 namespace ConsoleSystemMonitoring.MetricCollectors
 {
-    internal class WindowsRamMetricCollector: BaseMetricCollector
+    internal class WindowsRamMetricCollector : BaseMetricCollector
     {
-        private readonly HardwareInfo info = new();
+        private readonly HardwareInfo _info = new();
 
         public override string GetStringData()
         {
-            info.RefreshMemoryStatus();
+            _info.RefreshMemoryStatus();
             var resultString = new StringBuilder();
 
             resultString.AppendLine($"Total RAM: {GetTotalRamValue() / 1024 / 1024} MB");
@@ -19,8 +19,8 @@ namespace ConsoleSystemMonitoring.MetricCollectors
             return resultString.ToString();
         }
 
-        private ulong GetTotalRamValue() => info.MemoryStatus.TotalPhysical;
-        private ulong GetAvailableRamValue() => info.MemoryStatus.AvailablePhysical;
+        private ulong GetTotalRamValue() => _info.MemoryStatus.TotalPhysical;
+        private ulong GetAvailableRamValue() => _info.MemoryStatus.AvailablePhysical;
         private double GetRamUsagePercent() => (double)(GetTotalRamValue() - GetAvailableRamValue()) / GetTotalRamValue() * 100;
     }
 }
