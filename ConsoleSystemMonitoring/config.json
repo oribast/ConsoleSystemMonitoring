@@ -1,5 +1,6 @@
 {
-  "CollectionInterval": 3,
-  "OutputFormat": "LogFile",
+  "CollectionInterval": 2,
+  "OutputFormat": "Console",
+  "UseTimestamp": true,
   "LogFileName": "../../../log.txt"
 }

@@ -1,30 +1,57 @@
-﻿using System.Text;
-using Hardware.Info;
+﻿using System.Management;
+using System.Runtime.Versioning;
+using ConsoleSystemMonitoring.MetricCollectors.Dto;
 
 namespace ConsoleSystemMonitoring.MetricCollectors
 {
-    internal class WindowsRamMetricCollector(Configuration config) : BaseMetricCollector(config)
+    [SupportedOSPlatform("windows")]
+    internal class WindowsRamMetricCollector : BaseMetricCollector<RamDto>
     {
-        private readonly HardwareInfo _info = new();
-
-        public override string GetStringData()
+        public override RamDto GetMetricData()
         {
-            _info.RefreshMemoryStatus();
-            var resultString = new StringBuilder();
+            var total = GetTotalMemoryBytes();
+            var free = GetAvailableMemoryBytes();
+            var percent = GetRamUsagePercent(total, free);
 
-            // TODO: Подумать о методе расширении для добавления текущей даты и времени в строку, чтобы не дублировать код
-            AppendCurrentDateTimeToLogFileData(resultString);
-            resultString.AppendLine($"Total RAM: {GetTotalRamValue() / 1024 / 1024} MB");
-            AppendCurrentDateTimeToLogFileData(resultString);
-            resultString.AppendLine($"Available RAM: {GetAvailableRamValue() / 1024 / 1024} MB");
-            AppendCurrentDateTimeToLogFileData(resultString);
-            resultString.AppendLine($"RAM Usage: {GetRamUsagePercent():F2}%");
-
-            return resultString.ToString();
+            return new RamDto(total, free, percent);
         }
 
-        private ulong GetTotalRamValue() => _info.MemoryStatus.TotalPhysical;
-        private ulong GetAvailableRamValue() => _info.MemoryStatus.AvailablePhysical;
-        private double GetRamUsagePercent() => (double)(GetTotalRamValue() - GetAvailableRamValue()) / GetTotalRamValue() * 100;
+        private ulong GetTotalMemoryBytes()
+        {
+            ulong total = 0;
+
+            using var totalSearcher = new ManagementObjectSearcher(
+                "SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
+
+            foreach (ManagementObject obj in totalSearcher.Get())
+            {
+                total = (ulong)obj["TotalPhysicalMemory"];
+            }
+
+            return total;
+        }
+
+        private ulong GetAvailableMemoryBytes()
+        {
+            ulong free = 0;
+
+            using var freeSearcher = new ManagementObjectSearcher(
+                "SELECT FreePhysicalMemory FROM Win32_OperatingSystem");
+
+            foreach (ManagementObject obj in freeSearcher.Get())
+            {
+                free = (ulong)obj["FreePhysicalMemory"];
+            }
+
+            return free * 1024;
+        }
+
+        private double GetRamUsagePercent(ulong total, ulong free)
+        {
+            ulong used = total - free;
+            double percent = (double)used / total * 100;
+
+            return percent;
+        }
     }
 }

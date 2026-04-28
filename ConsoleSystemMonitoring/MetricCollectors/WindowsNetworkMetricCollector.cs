@@ -1,34 +1,35 @@
 ﻿using System.Net.NetworkInformation;
-using System.Text;
+using ConsoleSystemMonitoring.MetricCollectors.Dto;
 
 namespace ConsoleSystemMonitoring.MetricCollectors
 {
-    internal class WindowsNetworkMetricCollector : BaseMetricCollector
+    internal class WindowsNetworkMetricCollector : BaseMetricCollector<NetworkDto>
     {
         private readonly NetworkInterface[] _interfaces;
 
         private readonly IPv4InterfaceStatistics[] _previousData;
 
-        public WindowsNetworkMetricCollector(Configuration config) : base(config)
+        public WindowsNetworkMetricCollector()
         {
             _interfaces = NetworkInterface.GetAllNetworkInterfaces()
-                .Where(iface => iface.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
-                                iface.OperationalStatus == OperationalStatus.Up).ToArray();
+                .Where(iface =>
+                    iface.OperationalStatus == OperationalStatus.Up &&
+                    iface.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                    iface.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                    iface.NetworkInterfaceType != NetworkInterfaceType.Unknown)
+                .ToArray();
+
             _previousData = _interfaces.Select(iface => iface.GetIPv4Statistics()).ToArray();
         }
 
-        public override string GetStringData()
+        public override NetworkDto GetMetricData()
         {
-            var resultString = new StringBuilder();
-            var data = GetTotalInOutSpeed();
+            var totalSpeed = GetTotalInOutSpeed();
 
-            AppendCurrentDateTimeToLogFileData(resultString);
-            resultString.AppendLine($"Total speed: In = {data.Item1} B/s, Out = {data.Item2} B/s");
-
-            return resultString.ToString();
+            return new NetworkDto(totalSpeed.inSpeed, totalSpeed.outSpeed);
         }
-
-        private (long, long) GetTotalInOutSpeed()
+        
+        private (ulong inSpeed, ulong outSpeed) GetTotalInOutSpeed()
         {
             long totalIn = 0;
             long totalOut = 0;
@@ -43,7 +44,7 @@ namespace ConsoleSystemMonitoring.MetricCollectors
                 _previousData[i] = current;
             }
 
-            return (totalIn, totalOut);
+            return ((ulong)totalIn, (ulong)totalOut);
         }
     }
 }

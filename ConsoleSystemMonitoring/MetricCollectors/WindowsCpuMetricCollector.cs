@@ -1,48 +1,39 @@
 ﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
-using System.Text;
+using ConsoleSystemMonitoring.MetricCollectors.Dto;
 
 namespace ConsoleSystemMonitoring.MetricCollectors
 {
     [SupportedOSPlatform("windows")]
-    internal class WindowsCpuMetricCollector : BaseMetricCollector, IDisposable
+    internal class WindowsCpuMetricCollector : BaseMetricCollector<CpuDto>, IDisposable
     {
         private readonly PerformanceCounter _totalCounter;
         private readonly PerformanceCounter[] _coreCounters;
 
-        public WindowsCpuMetricCollector(Configuration config) : base(config)
+        public WindowsCpuMetricCollector()
         {
-            _totalCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            _totalCounter = new PerformanceCounter("Processor", 
+                "% Processor Time", "_Total");
 
             _coreCounters = new PerformanceCounter[Environment.ProcessorCount];
             for (int i = 0; i < _coreCounters.Length; i++)
             {
-                _coreCounters[i] = new PerformanceCounter("Processor", "% Processor Time", i.ToString());
+                _coreCounters[i] = new PerformanceCounter("Processor", 
+                    "% Processor Time", i.ToString());
             }
 
-            //_totalCounter.NextValue();
-            //foreach (var coreCounter in _coreCounters)
-            //{
-            //    coreCounter.NextValue();
-            //}
-        }
-
-        public override string GetStringData()
-        {
-            var resultString = new StringBuilder();
-
-            AppendCurrentDateTimeToLogFileData(resultString);
-            resultString.AppendLine($"Total CPU Usage: {GetTotalCpuUsage():F2}%");
-
-            var usagePerCore = GetCpuUsagePerCore();
-            for (int i = 0; i < usagePerCore.Length; i++)
+            /*
+             * Начальная инициализация счетчиков, чтобы при первом вызове NextValue() возвращалось корректное значение
+             */
+            _totalCounter.NextValue();
+            foreach (var coreCounter in _coreCounters)
             {
-                AppendCurrentDateTimeToLogFileData(resultString);
-                resultString.AppendLine($"Core {i} Usage: {usagePerCore[i]:F2}%");
+                coreCounter.NextValue();
             }
-            return resultString.ToString();
         }
+
+        public override CpuDto GetMetricData()
+            => new CpuDto(GetTotalCpuUsage(), GetCpuUsagePerCore());
 
         private double GetTotalCpuUsage() => _totalCounter.NextValue();
 
