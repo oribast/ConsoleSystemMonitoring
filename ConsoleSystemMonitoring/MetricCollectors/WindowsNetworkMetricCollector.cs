@@ -28,7 +28,7 @@ namespace ConsoleSystemMonitoring.MetricCollectors
 
             return new NetworkDto(totalSpeed.inSpeed, totalSpeed.outSpeed);
         }
-        
+
         private (ulong inSpeed, ulong outSpeed) GetTotalInOutSpeed()
         {
             long totalIn = 0;

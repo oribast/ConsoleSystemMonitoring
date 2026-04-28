@@ -4,7 +4,7 @@ namespace ConsoleSystemMonitoring.Utils
 {
     public static class StringBuilderExtension
     {
-        private static string GetTimestamp(char finalSymbol) 
+        private static string GetTimestamp(char finalSymbol)
             => $"[{DateTime.UtcNow:dd.MM.yyyy HH:mm:ss:ffff}]{finalSymbol}";
 
         public static void AppendLineWithTimestamp(this StringBuilder strBuilder, string str, bool useTimestamp = false)

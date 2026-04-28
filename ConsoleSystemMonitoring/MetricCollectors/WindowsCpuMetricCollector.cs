@@ -12,13 +12,13 @@ namespace ConsoleSystemMonitoring.MetricCollectors
 
         public WindowsCpuMetricCollector()
         {
-            _totalCounter = new PerformanceCounter("Processor", 
+            _totalCounter = new PerformanceCounter("Processor",
                 "% Processor Time", "_Total");
 
             _coreCounters = new PerformanceCounter[Environment.ProcessorCount];
             for (int i = 0; i < _coreCounters.Length; i++)
             {
-                _coreCounters[i] = new PerformanceCounter("Processor", 
+                _coreCounters[i] = new PerformanceCounter("Processor",
                     "% Processor Time", i.ToString());
             }
 

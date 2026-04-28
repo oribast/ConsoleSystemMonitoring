@@ -31,29 +31,33 @@ namespace ConsoleSystemMonitoring
             var ramCollector = new WindowsRamMetricCollector();
             var netCollector = new WindowsNetworkMetricCollector();
 
-            while (true)
+            if (config.OutputFormat == OutputFormat.Console)
             {
-                if (config.OutputFormat == OutputFormat.Console)
-                {
-                    ConsoleOutput(config, cpuCollector, ramCollector, netCollector);
-                }
-                else if (config.LogFileName != null)
-                {
-                    FileOutput(config, cpuCollector, ramCollector, netCollector);
-                }
+                ConsoleOutput(config, cpuCollector, ramCollector, netCollector);
+            }
+            else if (config.LogFileName != null)
+            {
+                FileOutput(config, cpuCollector, ramCollector, netCollector);
             }
         }
 
+        /*
+         * Тут можно было подумать над тем, как избавиться от мерцаний консоли при каждом обновлении,
+         *  но для простоты реализации оставил так
+         */
         private static void ConsoleOutput(Configuration config,
             WindowsCpuMetricCollector cpuCollector,
             WindowsRamMetricCollector ramCollector,
             WindowsNetworkMetricCollector netCollector)
         {
-            Console.WriteLine(MetricDataFormatter.Format(cpuCollector.GetMetricData(), config.UseTimestamp));
-            Console.WriteLine(MetricDataFormatter.Format(ramCollector.GetMetricData(), config.UseTimestamp));
-            Console.WriteLine(MetricDataFormatter.Format(netCollector.GetMetricData(), config.UseTimestamp));
-            Thread.Sleep(config.CollectionInterval * 1000);
-            Console.Clear();
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine(MetricDataFormatter.Format(cpuCollector.GetMetricData(), config.UseTimestamp));
+                Console.WriteLine(MetricDataFormatter.Format(ramCollector.GetMetricData(), config.UseTimestamp));
+                Console.WriteLine(MetricDataFormatter.Format(netCollector.GetMetricData(), config.UseTimestamp));
+                Thread.Sleep(config.CollectionInterval * 1000);
+            }
         }
 
         private static void FileOutput(Configuration config,
@@ -61,13 +65,16 @@ namespace ConsoleSystemMonitoring
             WindowsRamMetricCollector ramCollector,
             WindowsNetworkMetricCollector netCollector)
         {
-            File.AppendAllText(config.LogFileName, 
-                MetricDataFormatter.Format(cpuCollector.GetMetricData(), config.UseTimestamp));
-            File.AppendAllText(config.LogFileName, 
-                MetricDataFormatter.Format(ramCollector.GetMetricData(), config.UseTimestamp));
-            File.AppendAllText(config.LogFileName, 
-                MetricDataFormatter.Format(netCollector.GetMetricData(), config.UseTimestamp));
-            Thread.Sleep(config.CollectionInterval * 1000);
+            while (true)
+            {
+                File.AppendAllText(config.LogFileName,
+                    MetricDataFormatter.Format(cpuCollector.GetMetricData(), config.UseTimestamp));
+                File.AppendAllText(config.LogFileName,
+                    MetricDataFormatter.Format(ramCollector.GetMetricData(), config.UseTimestamp));
+                File.AppendAllText(config.LogFileName,
+                    MetricDataFormatter.Format(netCollector.GetMetricData(), config.UseTimestamp));
+                Thread.Sleep(config.CollectionInterval * 1000);
+            }
         }
     }
 }
